@@ -32,8 +32,15 @@ pipeline {
             }
         }
         stage('Deploy') {
+            agent any
             steps {
-                sh './jenkins/scripts/deliver.sh'
+                script {
+                    // Ensure we're in a 'node' block
+                    node {
+                        // Execute your deployment script here
+                        sh './jenkins/scripts/deliver.sh'
+                    }
+                }
                 input message: 'Sudah selesai menggunakan React App? (Klik "Proceed" untuk mengakhiri)'
                 sh 'sleep 1m'
                 sh './jenkins/scripts/kill.sh'
