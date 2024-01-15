@@ -48,15 +48,8 @@ pipeline {
                         // Docker run command to build the application with PyInstaller
                         sh "docker run --rm -v ${VOLUME} ${IMAGE} 'pyinstaller -F add2vals.py'"
                         
-                        // Prompt for manual approval
-                        def userInput = input(
-                            id: 'proceedOrAbort', message: 'Sudah selesai menggunakan React App? (Klik "Proceed" untuk mengakhiri)',
-                            parameters: [choice(name: 'ACTION', choices: ['Proceed', 'Abort'], description: 'Choose an action')]
-                        )
+                            input message: 'Sudah selesai menggunakan React App? (Klik "Proceed" untuk mengakhiri)',
 
-                        if (userInput == 'Abort') {
-                            error("Deployment aborted by user")
-                        }
                     }
                 }
             }
