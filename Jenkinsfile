@@ -49,7 +49,7 @@ pipeline {
                         sh "docker run --rm -v ${VOLUME} ${IMAGE} 'pyinstaller -F add2vals.py'"
                         
                         input message: 'Sudah selesai menggunakan React App? (Klik "Proceed" untuk mengakhiri)'
-
+                        sh 'sleep 1m'
                     }
                 }
             }
