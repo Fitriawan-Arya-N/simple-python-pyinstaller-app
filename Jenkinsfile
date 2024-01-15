@@ -35,25 +35,40 @@ pipeline {
                 input message: 'Lanjutkan ke tahap Deploy? (Klik "Proceed" untuk melanjutkan)'
             }
         }
-        stage('Deploy') { // (1)
+        stage('Deploy') {
             agent any
-            environment { // (2)
+            environment {
                 VOLUME = '$(pwd)/sources:/src'
                 IMAGE = 'cdrx/pyinstaller-linux:python2'
             }
             steps {
-                dir(path: env.BUILD_ID) { // (3)
-                    unstash(name: 'compiled-results') // (4)
-                    sh "docker run --rm -v ${VOLUME} ${IMAGE} 'pyinstaller -F add2vals.py'" // (5)
+                dir(path: env.BUILD_ID) {
+                    unstash(name: 'compiled-results')
+                    script {
+                        // Docker run command to build the application with PyInstaller
+                        sh "docker run --rm -v ${VOLUME} ${IMAGE} 'pyinstaller -F add2vals.py'"
+                        
+                        // Prompt for manual approval
+                        def userInput = input(
+                            id: 'proceedOrAbort', message: 'Sudah selesai menggunakan React App? (Klik "Proceed" untuk mengakhiri)',
+                            parameters: [choice(name: 'ACTION', choices: ['Proceed', 'Abort'], description: 'Choose an action')]
+                        )
+
+                        if (userInput == 'Abort') {
+                            error("Deployment aborted by user")
+                        }
+                    }
                 }
             }
             post {
                 success {
-                    archiveArtifacts "${env.BUILD_ID}/sources/dist/add2vals" // (6)
+                    // Archive artifacts and clean up after successful deployment
+                    archiveArtifacts "${env.BUILD_ID}/sources/dist/add2vals"
                     sh "docker run --rm -v ${VOLUME} ${IMAGE} 'rm -rf build dist'"
                 }
             }
         }
+
     }
 }
 
